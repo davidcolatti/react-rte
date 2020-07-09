@@ -5,7 +5,7 @@ const MyStatefulEditor = ({ onChange }) => {
   const [value, setValue] = useState(RichTextEditor.createEmptyValue());
 
   function handleChange(value) {
-    let markdown = value.toString("markdown");
+    let markdown = value.toString("html");
     handleRegex(markdown);
     setValue(value);
 
@@ -15,13 +15,32 @@ const MyStatefulEditor = ({ onChange }) => {
   }
 
   function handleRegex(markdown) {
-    // let chapterRegex = /^-(.*)/gm;
-    // let titleRegex = /( {4})-(.*)/gm;
-    // let chapterArray = markdown.match(chapterRegex);
-    // let titleArray = markdown.match(titleRegex);
-    let test = markdown.match(/^-(.*)|( {4})-(.*)/gm);
+    let test = markdown
+      .replace(/(^ {2}<li>)/gm, "parent - ")
+      .replace(/(^ {6}<li>)/gm, "direct child - ")
+      .replace(/(^ {10}<li>)/gm, "children - ");
 
-    console.log(test);
+    // let parentArray = test.match(/^parent -.*/gm);
+    // let directChildArray = test.match(/^direct child -.*/gm);
+    // let childrenArray = test.match(/^children -.*/gm);
+    // let parsed = [];
+
+    let testArray = test.split(">");
+
+    let filteredArray = testArray.filter(
+      (each) =>
+        each.includes("parent") ||
+        each.includes("direct child") ||
+        each.includes("children")
+    );
+    // .map((each) =>
+    //   each
+    //     .replace(/([\w ]+ - )/g, "")
+    //     .replace(/(\s)*<\/?\w{2}?/g, "")
+    //     .trim()
+    // );
+
+    console.log(filteredArray);
   }
 
   return (
@@ -33,7 +52,7 @@ const MyStatefulEditor = ({ onChange }) => {
       <textarea
         name="textarea"
         className="textarea"
-        value={value.toString("markdown")}
+        value={value.toString("html")}
       />
     </div>
   );
