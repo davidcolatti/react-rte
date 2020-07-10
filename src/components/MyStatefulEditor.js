@@ -15,65 +15,40 @@ const MyStatefulEditor = ({ onChange }) => {
   }
 
   function handleRegex(markdown) {
-    debugger;
-    let dataArray = markdown
-      .replace(/(^ {2}<li>)/gm, "parent - ") // identifying what type of text it is
-      .replace(/(^ {6}<li>)/gm, "direct child - ")
-      .replace(/(^ {10}<li>)/gm, "children - ")
-      .split(">") // making all of the string an array
-      .filter(
-        // filtering array so we can work on only the text we need
-        (each) =>
-          each.includes("parent") ||
-          each.includes("direct child") ||
-          each.includes("children")
-      )
-      .map((each) => each.replace(/(\s)*<\/?\w{2}?/g, "").trim()); // mapping to remove unnecessary space and symbols
+    let dataArray = markdown.match(/^.*<li>.*/gm);
 
-    let parsedData = [];
-
-    for (let i = 0; i < dataArray.length; i++) {
-      if (dataArray[i].includes("parent")) {
-        let data = {};
-        data.parent = dataArray[i];
-
-        for (let j = i + 1; j < dataArray.length; j++) {
-          data.direct_children = [];
-
-          if (dataArray[j].includes("direct child")) {
-            let childData = { name: dataArray[j] };
-
-            data.direct_children.push(childData);
-            // console.log(data);
-            for (let k = j + 1; k < dataArray.length; k++) {
-              if (dataArray[k].includes("children")) {
-                childData.children = [];
-
-                childData.children.push(dataArray[k]);
-              } else {
-                break;
-              }
-            }
-          } else {
-            break;
-          }
-        }
-
-        parsedData.push(data);
-      }
-    }
-
-    // console.log(dataArray);
-    console.log(parsedData);
+    let parsed = findParentAndChildren(dataArray);
+    console.log(parsed);
   }
 
-  // let ex = {
-  //   parent: "chapter 1",
-  //   direct_children: [
-  //     { name: " title 1" },
-  //     { name: "title 2", children: ["title 2.1", "title 2.2"] },
-  //   ],
-  // };
+  function findParentAndChildren(array) {
+    let parsed = [];
+    let children = [];
+
+    array.forEach((each) => {
+      let parent = each.split("<")[0].length === 2;
+      let child = each.split("<")[0].length === 6;
+      let cleanedData = pullValue(each);
+      console.log(cleanedData);
+
+      if (parent) {
+        if (children.length > 0) {
+          parsed.push(children);
+        }
+        children = [];
+
+        parsed.push(cleanedData);
+      } else if (child) {
+        children.push(cleanedData);
+      }
+    });
+
+    return parsed;
+  }
+
+  function pullValue(string) {
+    return string.replace(/^.*<li>(.[\w\d .]*).*/gm, "$1");
+  }
 
   return (
     <div>
