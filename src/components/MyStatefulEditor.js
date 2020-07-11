@@ -3,6 +3,7 @@ import RichTextEditor from "react-rte";
 
 const MyStatefulEditor = ({ onChange }) => {
   const [value, setValue] = useState(RichTextEditor.createEmptyValue());
+  const [parsedData, setParsedData] = useState("");
 
   function handleChange(value) {
     let markdown = value.toString("html");
@@ -17,8 +18,9 @@ const MyStatefulEditor = ({ onChange }) => {
   function handleRegex(markdown) {
     let dataArray = markdown.match(/^.*<li>.*/gm);
 
-    let parsed = findParentAndChildren(dataArray);
-    console.log(parsed);
+    let parsedArray = findParentAndChildren(dataArray);
+    console.log(parsedArray);
+    setParsedData(JSON.stringify(parsedArray));
   }
 
   function findParentAndChildren(array) {
@@ -29,7 +31,6 @@ const MyStatefulEditor = ({ onChange }) => {
       let parent = each.split("<")[0].length === 2;
       let child = each.split("<")[0].length === 6;
       let cleanedData = pullValue(each);
-      console.log(cleanedData);
 
       if (parent) {
         if (children.length > 0) {
@@ -61,6 +62,7 @@ const MyStatefulEditor = ({ onChange }) => {
         className="textarea"
         value={value.toString("html")}
       />
+      {parsedData}
     </div>
   );
 };
